@@ -1,0 +1,37 @@
+---
+title: "BoJack Hoseman e os feels"
+output:
+  html_document:
+    df_print: paged
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("tidyverse")
+series = read_csv("data/series_from_imdb.csv.zip")
+
+```
+
+Bojack Horseman é uma animação focada em seus personagens, que aborda temas delicados como depressão, demência e complexos destrutivos. Dito isso, os episódios mexem tanto com os personagens, quanto com os seus telespectadores.
+
+Nesse sentido, queremos saber se os episódios mais vistos são justamente aqueles que apresentam uma mudança no comportamento dos personagens em questão e/ou uma explicação passada que justifica suas ações no presente, resultando em uma conexão pessoal com o telespectador.
+
+A única medida que melhor se aproxima da quantidade de visualizações é a quantidade de votos, logo, compararemos a popularidade de todos os episódios da série.
+
+```{r}
+bojack = series %>% filter(series_name=="BoJack Horseman")
+bojack %>% ggplot(mapping = aes(x = series_ep,y = UserVotes,color = as.factor(season)))+
+geom_point(size = 2)+
+geom_line()
+
+```
+
+Os episódios mais votados foram Free Churros e Time's Arrow. Sendo que o primeiro é um monólogo do personagem principal sobre sua mãe que veio à falecer. Enquanto o segundo mostra a trajetória da mãe do personagem principal, que passou de uma criança traumatizada, para uma garota brilhante e confiante, para uma mãe amarga e detestável.
+```{r ECHO=FALSE}
+bojack = series %>% filter(series_name=="BoJack Horseman")
+bojack %>% ggplot(mapping = aes(x = series_ep,y = UserRating,color = as.factor(season)))+
+geom_point(size = 2)+
+geom_line()
+
+```
+
+Esses mesmos episódios são também os de maior nota. É possível notar, pela vizualização de ambos os gráficos que os picos não se mantêm. Isso ocorre porque, pelo menos para os picos, a narrativa se torna pessoal e sincera, de tal forma que são exaustivamente discutidos em foruns ou vídeos pela internet, enquanto os demais episódios, à sua maneira, retratam as eventualidades nos cotidianos de cada personagem.

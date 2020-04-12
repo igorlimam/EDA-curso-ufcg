@@ -1,0 +1,124 @@
+---
+title: "Regressão múltipla"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  html_notebook:
+    fig_width: 7
+    theme: readable
+    toc: yes
+    toc_float: yes
+---
+
+```{r message=FALSE, warning=FALSE}
+library(openintro)
+library(tidyverse)
+library(ggbeeswarm)
+library(modelr)
+library(broom)
+theme_set(theme_bw())
+```
+
+Os dados que usaremos estão detalhados nessa página do [OpenIntro](https://www.openintro.org/stat/data/?data=evals).
+
+```{r}
+profs = read_csv("https://www.openintro.org/stat/data/evals.csv") %>% 
+    select(score, age, gender, bty_avg, pic_outfit, pic_color)
+glimpse(profs)
+```
+
+Como as variáveis, separadamente, se relacionam com score.
+
+Analisando as visualizações
+
+```{r}
+profs %>% 
+    ggplot(aes(x = age, y = score)) + 
+    geom_count()
+```
+
+O primeiro, score x age, mostra que é mais frequente professores(as) de meia idade ensinarem bem. Além disso, podemos ver que as melhores avaliações pertencem a idades entre 45 a 68 anos. Também, vemos que professores acima dos 75 nunca tem score menor que 3.5.
+
+```{r}
+profs %>% 
+    ggplot(aes(x = bty_avg, y = score)) + 
+    geom_count()
+```
+
+O segundo, score x beauty average, mostra que a faixa de beauty vai de 1 até 9. Dito isso, vemos que não é garantido que docentes com muita beleza ensinem bem, até porque a maior parte dos dados está à esquerda dos 5 pontos.
+
+```{r}
+profs %>% 
+    ggplot(aes(x = pic_outfit, y = score)) + 
+    geom_count()
+```
+
+O terceiro, socre x picture outfit, mostra que uma maioria esmagadora de docentes não usaram roupa formal nas fotos e, aparentemente, é um pouco mais comum ter melhores scores usando roupas informais.
+
+```{r}
+profs %>% 
+    ggplot(aes(x = pic_color, y = score)) + 
+    geom_count()
+```
+
+O quarto, score x picture color, diferente do terceiro, tem alcances de valores diferentes, mostrando que, apesar de em menor quantidade, fotos em preto e branco garantem uma melhor faixa de score do que a alternativa. Apesar disso, as coloridas são consistentes em scores muito altos.
+
+```{r}
+profs %>% 
+  ggplot(aes(gender,score))+
+  geom_count()
+
+```
+
+O quinto, score x gender, mostram que, apesar da maioria ser masculina, as faixas são parecidas. Ou seja, visualmente, é dificil determinar se existe uma relação de score x genero.
+
+---
+
+Para fins de comparação, calculemos o slope, intercept e R2 de cada relação simples.
+
+Através das funções *lm* e *glance* conseguimos as seguintes equações: 
+
+* $score = -0.0059 * age + 4.4619$, R2 = 0.0114
+* $score = -0.0666 * beauty + 3.8803$, R2 = 0.035
+* $score = -0.0552 * outfit + 4.2208$, (formal = 0, não formal = 1), R2 = 0.0014
+* $score = -0.2246 * color + 4.3615$,(colorido = 1,não colorido = 0), R2 = 0.0239
+* $score = 0.1415 * gender + 4.0928$,(masculino = 1,feminino = 0), R2 = 0.0016
+
+Podemos ver que os R2 dessas relações lineares são expressivamente baixos. Devemos então aplicar multiplas entradas para tentar descrever a saida de forma linear.
+
+```{r}
+
+modelo = lm(score ~ age+bty_avg+pic_outfit+pic_color+gender,data = profs)
+
+tidy(modelo,conf.int = TRUE)
+glance(modelo)
+
+```
+
+A relação de todos na amostra nos gera a equação $score = 4.3701 - 0.0071 * age + 0.0047 * beauty - 0.0151 * outfit - 0.2123 * color + 0.2233 * gender$, R2 = 0.088.
+
+Algumas observações sobre a equação e a população, considerando um intervalo com 95% de confiança:
+
+1. Com um a faixa de [0.1212,0.3255], temos que o gênero do docente afeta de forma positiva o score, ou seja, se o docente for do sexo masculino, então há um ganho de score, significando que é desvantajoso ser do sexo feminino. Assim, sabemos que,apesar de pouco, o gênero influência no score, em que ser do sexo masculino aumenta o score em todos os casos.
+
+2. Com uma faixa de [-0.3481,-0.0765], temos que a presença de cores na foto afeta de forma negativa o score, ou seja, se a foto for colorida, então se perde score, significando que é preferível ter foto preto e branco. Dito isso, mesmo com uma faixa pouco relevante, as cores na foto ainda continua um fator de influência no score.
+
+3. Com uma faixa de [0.0125,0.0821], temos que a beleza média afeta de forma positiva o score, ou seja, quanto maior essa pontuação, maior o score do docente. Ela pode contribuir pouco ou de forma relevante no score, tendo em vista que o máximo da faixa nos leva a valores maiores próximos de 1 ponto.
+
+4. Com uma faixa de [-0.1483,0.118], temos que a roupa na foto mostrada afeta de forma negativa, nula ou positiva o score, ou seja, não podemos dizer se a informal causa ganho, perda ou nenhuma mudança no score. Além disso, podemos ver que os valores limites são baixos, implicando uma influência pequena sobre a pontuação total.
+
+5. Com uma faixa de [-0.0125,-0.0017], temos que a idade afeta de forma negativa o score, ou seja, quanto mais jovem, maior será o score. Apesar disso, mesmo em seu valor maximo(75), o valor alcançado da faixa superior de -0.1275 continua tendo pouca relevância para a pontuação total, mesmo que ela sempre exista.
+
+
+Apesar do gênero e a presença de cor na foto possuirem fatores numericamente maiores, seus intervalos tornam suas possíveis influências menores que beleza média([0,10]) e idade([30,75]). Sendo assim, o score total pode ser influênciado, principalmente, por beleza e idade.
+
+O R2 da relação de todos os atributos é maior do que todas as relações simples com score, ou seja, essa relação multivariada explica 8.77% dos dados. Apesar do número baixo, ainda é melhor que a explicação de 3.5% adquirida na relação score x beauty.
+
+---
+
+A regressão multivariada foi usada na amostra para analisar a associação entre score e idade, beleza média, roupa formal na foto, foto colorida e gênero. Os resultados da regressão indicam que o modelo no formato $score = 4.3701 - 0.0071 * age + 0.0047 * beauty - 0.0151 * outfit - 0.2123 * color + 0.2233 * gender$ explicam 8.77% da variância da variável de resposta (R2 = 0.0877). O aumento de 1 unidade de idade como anos produz uma variação de -0.0071 no score, o aumento de 1 unidade de beleza média produz uma variação de 0.0047 no score, não usar roupa formal na foto produz uma variação de -0.0151 no score, foto colorida produz uma variação de -0.2123 no score, ser do sexo masculino produz uma variação de 0.2233 no score.
+
+Para a população foi visto que a influência dos fatores considerados permanece parecida, com exceção da cor na foto que é incerto o tipo de influência que existe no score. Dito isso, podemos dizer, com 95% de confiança, que a forma dos resultados da amostra se assemelha aos resultados da população, salvo pelas diferenças de intensidades anteriormente mostradas e a particularidade da cor na foto.
+
+Podemos concluir que os fatores avaliados falam pouco sobre a didática do docente, apesar de existir uma influência clara da estética sobre o score.

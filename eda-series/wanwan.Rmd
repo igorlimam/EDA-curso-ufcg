@@ -1,0 +1,52 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r insert=FALSE}
+    
+install.packages("tidyverse")
+install.packages("ggbeeswarm")
+install.packages("dplyr")
+library(tidyverse)
+library(ggbeeswarm)
+library(dplyr)
+series = read_csv("data/series_from_imdb.csv.zip")
+```
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+
+series %>% 
+arrange(desc(UserRating)) %>% 
+select(series_name,Episode,UserRating,UserVotes)
+
+series %>%
+filter(series_name=="BoJack Horseman" | series_name=="Game of Thrones" | series_name=="House of Cards") %>% 
+ggplot(mapping = aes(x = UserVotes,y= UserRating,color=series_name))+
+geom_point(alpha=0.5)
+
+mpg %>% 
+top_n(1,wt = year)
+
+
+```
+
+
+
+```{r}
+
+oneSeason = series %>% 
+group_by(series_name) %>% 
+filter(series_ep == max(series_ep)) %>% 
+filter(season == 1 && max(series_ep) > 1)
+
+series %>%
+filter(series_name %in% pull(oneSeason,series_name)) %>% 
+ggplot(mapping=aes(x=UserVotes,y=UserRating,color=series_name))+
+geom_point()
+
+```

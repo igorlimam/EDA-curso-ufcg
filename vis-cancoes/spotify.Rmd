@@ -1,0 +1,123 @@
+---
+title: "Fit Funk?"
+author: "Francisco Igor de Lima Mendes"
+date: "15/03/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("dplyr")
+library(tidyverse)
+library(dplyr)
+spotify = read.csv("data/playlists-spotify.csv",encoding="UTF-8")
+```
+
+## Usaremos uma amostra de dados de playlists do spotify com o objetivo de aplicar alguns conceitos básicos de EDA.
+
+Dada essas playlist e suas músicas estamos interessados em investigar qual seria a melhor para usar em uma seção de Fit Dance.
+
+Dito isso, usaremos os indices de energia e dançabilidade de cada música para podermos traçar qual playlist daria a maior e, possivelmente, a melhor disposição para tal atividade.
+
+```{r}
+#Pontos playlists mais energeticas
+spotify %>% 
+group_by(playlist_name) %>% 
+ggplot(mapping=aes(x=energy,y=playlist_name))+
+geom_point(alpha = 0.3)
+    
+```
+
+Playlists de Funk tendem a serem mais energéticas, atingindo, em algumas músicas quase o máximo do índice. Isso nos leva a concluir que as músicas de Funk, provavelmente, são as mais eletrizantes, barulhentas e rápidas.
+
+```{r}
+#Pontos playlists mais dançáveis
+spotify %>% 
+group_by(playlist_name) %>% 
+ggplot(mapping=aes(y=playlist_name,x=danceability))+
+geom_point(alpha = 0.3)
+    
+```
+
+A playlist "Clássicos do Funk", com uma das músicas mais energéticas, também mostra ser uma playlist incrívelmente dançável, pois boa parte das músicas dela tem o índice de dançabilidade entre 0.8 e ~0.97.
+
+```{r}
+#Boxplot playlists mais dançáveis
+spotify %>% 
+group_by(playlist_name) %>% 
+ggplot(mapping=aes(y=playlist_name,x=danceability))+
+geom_boxplot(coef = 1000)
+    
+```
+
+O Boxplot agora mostra que Clássicos do Funk tem a maioria dos seus pontos entre 0.81 e 0.93. Assim, sendo a playlist de maior dançabilidade.
+
+```{r}
+#Histogramas dos indices dançabilidade e energia das playlists
+
+spotify %>% 
+group_by(playlist_name) %>% 
+ggplot()+
+geom_histogram(mapping=aes(x = energy,fill = playlist_name),bins = 40)+
+facet_wrap(spotify$playlist_name)
+
+spotify %>% 
+group_by(playlist_name) %>% 
+ggplot()+
+geom_histogram(mapping=aes(x = danceability,fill = playlist_name),bins = 40)+
+facet_wrap(spotify$playlist_name)
+    
+```
+
+O primeiro  histograma mostra que, aparentemente, "Clássicos do Funk", "Bonde do Funk" e "Funknejo" tem mais músicas com energia próximas ao máximo. Apesar disso, a dançabilidade da "Clássico do Funk" supera todas as outras playlists, como foi visto em vizualizações anteriores.
+
+```{r}
+#Summário das médias de dançabilidade para cada playlist
+
+sumario = spotify %>% 
+group_by(playlist_name) %>% 
+summarise(dancabilidade_media = mean(danceability),qtd_musicas = n(),max_danca=max(danceability), min_danca=min(danceability))
+
+sumario %>% arrange(desc(dancabilidade_media))
+
+```
+
+```{r}
+#Summário das médias de energia para cada playlist
+
+sumario = spotify %>% 
+group_by(playlist_name) %>% 
+summarise(energia_media = mean(energy),qtd_musicas = n(),max_energia=max(energy), min_energia=min(energy))
+
+sumario %>% arrange(desc(energia_media))
+```
+
+Por "Clássicos do Funk" ter o melhor "centro de massa" da dançabilidade, a segunda melhor energia e levando em conta as outras vizualizações das variáveis escolhidas, ela provavelmente seria a melhor playlist para uma seção de Fit Dance.
+
+```{r}
+#Summário das médias de energia para cada playlist
+
+spotify %>% 
+ggplot(mapping=aes(x = energy,y = danceability))+
+geom_point()+
+facet_wrap(~playlist_name)
+
+    
+```
+
+
+```{r}
+#Summário das médias de energia para cada playlist
+
+spotify %>% 
+group_by(playlist_name) %>% 
+summarise(pearson = cor(x = energy, y = danceability,method = "pearson"),
+          spearman = cor(x = energy, y = danceability,method = "spearman"),
+          kendall = cor(x = energy, y = danceability,method = "kendall"))
+
+    
+```
+
+

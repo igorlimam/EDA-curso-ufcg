@@ -1,0 +1,21 @@
+---
+title: "Spotify"
+author: "igor"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("dplyr")
+library(dplyr)
+library(tidyverse)
+playlists = read_csv(" https://github.com/cienciadedados-ufcg/vis-cancoes/raw/master/data/playlists-spotify.csv")
+```
+
+ R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+?flights
+```
+

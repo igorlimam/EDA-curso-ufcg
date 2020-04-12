@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+```{r}
+
+library(tidyverse)
+library(ggbeeswarm)
+library(broom)
+library(boot)
+
+pos = read_csv("data/amostra-alunos-comfpcc.csv")
+grad = read_csv("data/amostra-alunos.csv")
+
+```
+
+
+Quem toma mais cafe
+
+```{r}
+
+View(pos)
+
+grad %>% 
+ggplot(aes(x=`Quantas xícaras de café você tomou ontem?`))+
+geom_histogram()
+
+pos %>% 
+ggplot(aes(x=`Quantas xícaras de café você tomou ontem?`))+
+geom_histogram()
+
+
+
+```
+
+
+
+```{r}
+
+theta = function(d,i){
+    
+    d %>% 
+    slice(i) %>% 
+    summarise(media = mean(`Quantas xícaras de café você tomou ontem?`)) %>% 
+    pull(media)
+    
+}
+
+
+```
+
+
+Nao sabemos fazer diferenca de intervalos. Faremos entao intervalos de difertencaas.
+
+Ao inves da media foi usada a correlacao entre as duas coisas.
+
+Como lidar com dados extremos? Quando a media deixa de ser relevante?
+
+Diferenca nao pareada entre a media de dopis  grupos de lionjas.
+
+agrupa por turma, calcula a media ddaas turmas.
+
+E  entao nos fazemos um menos o outro cdd-fpcc.
+
+Para fazer isso iremos calcular a media e depois extrairemos o valor
+
+A funcao da um pull nas colunas que usaremos e retorna um numero menos o outro dentro da funcao, fazendo a diferenca para cada chamada do boot.
+
+
+Sinal, magnitude e confiança
+
+EVITAR A PALAVRA SIGNIFICATIVA
+
+
+
+
+Exercicio de implementacao e um quiz pra verificar
+
+Escala de 1 a 5, satisfacao aspira.
+
+Dos quatro, qual é o mecanismo que produz mais satisfação do que o baseline e quanto mais. (Ou seja, diferença)
+
+
+
+
+
+
+
+
+
+
+

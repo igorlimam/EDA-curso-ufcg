@@ -1,0 +1,408 @@
+---
+title: "Design de Jukeboxes - Baseline x Mecanismos"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Baseline x skip
+
+Queremos comparar a diferença média entre a satisfação usando a jukebox sem funcionalidades e a satisfação usando a função de skip (pular musica)
+. Dito isso, o objetivo é investigar se é e quanto é plausível dizer, em média, que skip é preferível a função nenhuma.
+
+```{r include=FALSE}
+
+library(tidyverse)
+library(broom)
+library(boot)
+theme_set(theme_bw())
+
+jukebox = read.csv("data/satisfacoes.csv")
+
+```
+
+Primeiro vamos observar a faixa de valores que zero funcionalidade possui. Para isso, plotaremos o nível de satisfação por usuário.
+
+```{r}
+
+jukebox %>% 
+filter(scenario == "baseline") %>% 
+ggplot(aes(user_id,satisfaction))+
+geom_point()
+
+```
+
+A maioria deles tem nota 2 e 3. Além disso, em uma escala de 1 a 5, nenhuma das avaliações supera nota 3.
+
+E enquanto a faixa de valores para a funcao de skip?
+
+```{r}
+
+jukebox %>% 
+filter(scenario == "skip") %>% 
+ggplot(aes(user_id,satisfaction))+
+geom_point()
+
+```
+
+Nesse caso a faixa está centrada entre 2 e 3 com a maioria dos pontos em 2 e 3, ou seja, aparentemente as funcionalidades tem satisfações parecidas.
+
+Queremos verificar agora, a partir dos resultados dessa amostra, para uma população qualquer, qual é uma provavél faixa da diferença média de satisfação entre esses dois mecanismos.
+
+Para isso usaremos a tecnica de bootstrapping na amostra com o intuito de gerar novas amostras aleatórias, dessa forma, podemos inferir informações da população a partir do que temos.
+
+
+```{r}
+
+theta = function(d,i){
+    
+    juke = d %>% 
+    slice(i) %>% 
+    group_by(scenario) %>% 
+    summarise(media = mean(satisfaction))
+    
+    baseline = juke %>% 
+    filter(scenario == "baseline") %>% 
+    pull(media)
+    
+    skip = juke %>% 
+    filter(scenario == "skip") %>% 
+    pull(media)
+    
+    skip - baseline
+    
+}
+
+
+jukebox %>% 
+boot(statistic = theta,R = 4000) %>% 
+tidy(conf.level = 0.95,conf.int = TRUE)
+
+```
+
+Como a diferença calculada foi skip - baseline(sem funcionalidades), quer dizer que: quanto mais positiva essa diferença, maior a preferência média pela funcão skip(pular faixa).
+
+Com base nos cáculos, com 95% de confiança, é plausível afirmar que a diferença média entre a satisfação da funcionalidade skip e nenhuma funcionalidade varia entre 0.05 e 0.73. Ou seja, pode-se dizer que não é um absurdo alegar que a funcionalidade skip é preferível a nenhuma funcionalidade.
+
+Tendo em vista que os níveis de satisfação variam de 1 a 5, podemos ver que a diferença média desses dois mecanismos é consideravelmente pequena, pois até o limite superior da faixa é menor que 1 ponto.
+
+```{r}
+
+medias = jukebox %>% 
+group_by(scenario) %>% 
+summarise(media = mean(satisfaction))
+
+skip = medias %>% 
+filter(scenario == "skip") %>%
+pull(media)
+
+baseline = medias %>% 
+filter(scenario == "baseline") %>%
+pull(media)
+
+theta_r = skip - baseline
+
+```
+
+```{r}
+
+#modelo nulo - Não existe diferença entre os dois grupos.
+
+um_embaralhamento = function(d){
+  
+  d %>% 
+  mutate(embaralhado = sample(scenario,n())) %>% 
+  group_by(embaralhado) %>% 
+  summarise(media = mean(satisfaction)) %>% 
+  summarise(dif = diff(media)) %>% 
+  pull(dif)
+
+}
+
+
+```
+
+
+```{r}
+
+d = jukebox %>% 
+filter(scenario == "skip" | scenario == "baseline")
+
+modelo_nulo = tibble(diferenca = replicate(1000,{um_embaralhamento(d)}))
+
+modelo_nulo %>% 
+mutate(igual_maior =  abs(diferenca)>= theta_r) %>% 
+summarise(p_valor = sum(igual_maior)/n())
+
+```
+
+Estimamos que há uma diferença estatisticamente significativa entre baseline e skip (theta_c = 0.3913, n = 23, p = 0.035).
+
+---
+
+### Baseline x like/dislike
+
+Queremos comparar a diferença média entre a satisfação usando a jukebox sem funcionalidades e a satisfação usando a função de like/dislike
+. Dito isso, o objetivo é investigar se é e quanto é plausível dizer, em média, que like/dislike é preferível a função nenhuma.
+
+Vejamos a faixa de valores para a funcao de like/dislike
+
+```{r}
+
+jukebox %>% 
+filter(scenario == "like/dislike") %>% 
+ggplot(aes(user_id,satisfaction))+
+geom_point()
+
+```
+
+Nesse caso a faixa está centrada entre 3 e 5 com a maioria dos pontos em 3 e 4, ou seja, like/dislike parece ser bem melhor avaliada que baseline.
+
+Aplicando bootstrapping:
+
+```{r}
+
+theta = function(d,i){
+    
+    juke = d %>% 
+    slice(i) %>% 
+    group_by(scenario) %>% 
+    summarise(media = mean(satisfaction))
+    
+    baseline = juke %>% 
+    filter(scenario == "baseline") %>% 
+    pull(media)
+    
+    like = juke %>% 
+    filter(scenario == "like/dislike") %>% 
+    pull(media)
+    
+    like - baseline
+    
+}
+
+
+jukebox %>% 
+boot(statistic = theta,R = 4000) %>% 
+tidy(conf.level = 0.95,conf.int = TRUE)
+
+```
+
+Como a diferença calculada foi like - baseline(sem funcionalidades), quer dizer que: quanto mais positiva essa diferença, maior a preferência média pela funcão like/dislike.
+
+Com base nos cáculos, com 95% de confiança, é plausível afirmar que a diferença média entre a satisfação da funcionalidade like/dislike e nenhuma funcionalidade varia entre 1.18 e 1.89. Ou seja, pode-se dizer que é comum alegar que a funcionalidade like/dislike é preferível a nenhuma funcionalidade.
+
+Tendo em vista que os níveis de satisfação variam de 1 a 5, podemos ver que a diferença média desses dois mecanismos é expressiva, pois toda a faixa indica pelo menos 1 ponto de diferença.
+
+```{r}
+
+medias = jukebox %>% 
+group_by(scenario) %>% 
+summarise(media = mean(satisfaction))
+
+like = medias %>% 
+filter(scenario == "like/dislike") %>%
+pull(media)
+
+baseline = medias %>% 
+filter(scenario == "baseline") %>%
+pull(media)
+
+theta_r = like - baseline
+
+```
+
+```{r}
+
+d = jukebox %>% 
+filter(scenario == "like/dislike" | scenario == "baseline")
+
+modelo_nulo = tibble(diferenca = replicate(1000,{um_embaralhamento(d)}))
+
+modelo_nulo %>% 
+mutate(igual_maior =  abs(diferenca)>= theta_r) %>% 
+summarise(p_valor = sum(igual_maior)/n())
+
+```
+
+Estimamos que há uma diferença estatisticamente significativa entre baseline e like/dislike (theta_c = 1.52, n = 23, p = 0).
+
+---
+
+### Baseline x up/downvoting
+
+Queremos comparar a diferença média entre a satisfação usando a jukebox sem funcionalidades e a satisfação usando a função de up/downvoting
+. Dito isso, o objetivo é investigar se é e quanto é plausível dizer, em média, que up/downvoting é preferível a função nenhuma.
+
+Vejamos a faixa de valores para a funcao de up/downvoting
+
+```{r}
+
+jukebox %>% 
+filter(scenario == "up/downvoting") %>% 
+ggplot(aes(user_id,satisfaction))+
+geom_point()
+
+```
+
+Nesse caso a faixa está centrada entre 4 e 5 com a maioria dos pontos em 4 e 5, ou seja, up/downvoting parece ser extremamente melhor avaliada que baseline.
+
+Aplicando bootstrapping:
+
+```{r}
+
+theta = function(d,i){
+    
+    juke = d %>% 
+    slice(i) %>% 
+    group_by(scenario) %>% 
+    summarise(media = mean(satisfaction))
+    
+    baseline = juke %>% 
+    filter(scenario == "baseline") %>% 
+    pull(media)
+    
+    up = juke %>% 
+    filter(scenario == "up/downvoting") %>% 
+    pull(media)
+    
+    up - baseline
+    
+}
+
+
+jukebox %>% 
+boot(statistic = theta,R = 4000) %>% 
+tidy(conf.level = 0.95,conf.int = TRUE)
+
+```
+
+Como a diferença calculada foi up - baseline(sem funcionalidades), quer dizer que: quanto mais positiva essa diferença, maior a preferência média pela funcão up/downvoting.
+
+Com base nos cáculos, com 95% de confiança, é plausível afirmar que a diferença média entre a satisfação da funcionalidade up/downvoting e nenhuma funcionalidade varia entre 1.93 e 2.59. Ou seja, pode-se dizer que é muito comum alegar que a funcionalidade up/downvoting é preferível a nenhuma funcionalidade.
+
+Tendo em vista que os níveis de satisfação variam de 1 a 5, podemos ver que a diferença média desses dois mecanismos é extrema, pois a faixa se mantem na região de dois a dois e meio pontos de diferença.
+
+```{r}
+
+medias = jukebox %>% 
+group_by(scenario) %>% 
+summarise(media = mean(satisfaction))
+
+up = medias %>% 
+filter(scenario == "up/downvoting") %>%
+pull(media)
+
+baseline = medias %>% 
+filter(scenario == "baseline") %>%
+pull(media)
+
+theta_r = up - baseline
+
+```
+
+```{r}
+
+d = jukebox %>% 
+filter(scenario == "up/downvoting" | scenario == "baseline")
+
+modelo_nulo = tibble(diferenca = replicate(1000,{um_embaralhamento(d)}))
+
+modelo_nulo %>% 
+mutate(igual_maior =  abs(diferenca)>= theta_r) %>% 
+summarise(p_valor = sum(igual_maior)/n())
+
+```
+
+Estimamos que há uma diferença estatisticamente significativa entre baseline e up/downvoting (theta_c = 2.26, n = 23, p = 0).
+
+---
+
+### Baseline x combined
+
+Queremos comparar a diferença média entre a satisfação usando a jukebox sem funcionalidades e a satisfação usando todas as funções
+. Dito isso, o objetivo é investigar se é e quanto é plausível dizer, em média, que combined é preferível a função nenhuma.
+
+Vejamos a faixa de valores para a funcao combined
+
+```{r}
+
+jukebox %>% 
+filter(scenario == "combined") %>% 
+ggplot(aes(user_id,satisfaction))+
+geom_point()
+
+```
+
+Nesse caso a faixa está centrada entre 3 e 5 com a maioria dos pontos em 4, ou seja, combined parece ser bem melhor avaliada que baseline.
+
+Aplicando bootstrapping:
+
+```{r}
+
+theta = function(d,i){
+    
+    juke = d %>% 
+    slice(i) %>% 
+    group_by(scenario) %>% 
+    summarise(media = mean(satisfaction))
+    
+    baseline = juke %>% 
+    filter(scenario == "baseline") %>% 
+    pull(media)
+    
+    combined = juke %>% 
+    filter(scenario == "combined") %>% 
+    pull(media)
+    
+    combined - baseline
+    
+}
+
+
+jukebox %>% 
+boot(statistic = theta,R = 4000) %>% 
+tidy(conf.level = 0.95,conf.int = TRUE)
+
+```
+
+Como a diferença calculada foi combined - baseline(sem funcionalidades), quer dizer que: quanto mais positiva essa diferença, maior a preferência média pela funcão combined.
+
+Com base nos cáculos, com 95% de confiança, é plausível afirmar que a diferença média entre a satisfação de todas as funcionalidades e nenhuma funcionalidade varia entre 1.56 e 2.56. Ou seja, pode-se dizer que é comum alegar que todas as funcinalidades são preferíveis a nenhuma funcionalidade.
+
+Tendo em vista que os níveis de satisfação variam de 1 a 5, podemos ver que a diferença média desses dois mecanismos pode ser expressiva ou até mesmo extrema, pois a faixa cobre um alcance que parte de um ponto e meio até dois pontos e meio.
+
+
+```{r}
+
+medias = jukebox %>% 
+group_by(scenario) %>% 
+summarise(media = mean(satisfaction))
+
+combined = medias %>% 
+filter(scenario == "combined") %>%
+pull(media)
+
+baseline = medias %>% 
+filter(scenario == "baseline") %>%
+pull(media)
+
+theta_r = combined - baseline
+
+```
+
+```{r}
+
+d = jukebox %>% 
+filter(scenario == "combined" | scenario == "baseline")
+
+modelo_nulo = tibble(diferenca = replicate(1000,{um_embaralhamento(d)}))
+
+modelo_nulo %>% 
+mutate(igual_maior =  abs(diferenca)>= theta_r) %>% 
+summarise(p_valor = sum(igual_maior)/n())
+
+```
+
+Estimamos que há uma diferença estatisticamente significativa entre baseline e combined (theta_c = 2.26, n = 23, p = 0).
+

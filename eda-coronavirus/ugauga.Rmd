@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+--> Regressão linear.
+
+Analise descritiva e exploratoria.
+
+-Visualização de dados.
+-Estatisticas/sumários
+
+Inferência Estatística
+Estimativas
+-Intervalos de confiança.
+-testes de hipótese.
+
+
+
+---
+
+Estatíticas/sumários -> criaremos modelos mais ricos dos dados.
+
+Modelo = simplificação da realidade que nos ajuda a entende-la.
+
+Vao descrevr relacionamento entre variaveis de forma tica
+
+Iremos estrapolar a situacao de duas variaveis.
+
+-> Regressão
+
+-Regressão linear(simples, multivariada)
+
+Ao estudar duas variaveis sempre começamos com a vizualização da relação delas
+
+
+
+Crie um notebook,
+escolha 1 outra cidade e faça a regressão de R0 e essa cidade(R0 x humidade).
+Alem disso, faça a regressão com a temperatura (R0 x temperatura).
+
+Talvez compare com Shangai, sei não. O principal é a outra cidade.
+
+
+
+Mais na comparacao:
+
+Intercept ser mais alta significa que uma indicação de quem é mais alto no valor 0.
+
+O modelo de Shangai passa mais perto do modelo de Chengdu. Ou seja, o modelo de Shangai nos permite conhecer mais sobre a realidade do que Chengdu.
+
+
+O modelo criado para Shangai se aproxima mais da realidade do que o mesmo modelo aplicado para Chengdu.
+
+geom_smooth(method="lm",se=FALSE)<--------
+
+
+1 - Em guan o efeito é baixo
+2 - Em guan essa relacao é uma pequena parcela do que altera a taxa de contagio
+
+R0 -> Variável de resposta ou variável dependente.
+
+humidade,temperatura -> Variável independente ou preditora ou de explicação.
+
+Aula dia 7/4
+
+Calcular o quadrado de alguma coisa é a mesma coisa que a area de um quadrado com aresta de tamanho alguma coisa.
+
+
+lm(R0 ~ humidade+temperatura,data = shangai)
+
+
+
+Pesquisa rodada em alunos de universidade avaliando a qualidade do ensino dos professores. Avaliando qualidade da docencia
+
+Junto com isso eles pegaram algumas caracteristicas do professores.
+
+Avaliação de beleza, sexo, idade. Foto colorida ou não, foto formal ou não.
+
+Estavam interessados na pergunta: Sera que os professores mais bonitos ensinam melhor? A beleza tem influencia no efeito da docencia.
+
+Quero ver o efeito da beleza no score.
+
+Descreva como é a relação entre score x beleza, levando em conta todas as variáveis.
+
+Relação do score com as outras coisas.
+
+lm -> gender(0,1)
+
+lm(bty_avg ~ gender+pic_color+pic_outfit)
+
+glance(lm) -> dá o R2.
+
+
+
+APLICAR INFERENCIA NA CONCLUSAO
+
+

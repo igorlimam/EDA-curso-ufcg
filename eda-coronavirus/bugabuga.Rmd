@@ -1,0 +1,236 @@
+---
+title: "Contágio: temperatura e humidade"
+output:
+    html_document:
+    df_print: paged
+theme: sandstone
+---
+
+```{r echo = FALSE,include = FALSE}
+library(tidyverse)
+library(here)
+library(ggbeeswarm)
+#theme_set(theme_bw())
+
+library(broom)
+library(modelr)
+
+#knitr::opts_chunk$set(tidy = FALSE,
+#                      fig.width = 6,
+#                      fig.height = 5,
+#                      echo = FALSE)
+```
+
+```{r read}
+contagio = read_csv(
+  here::here("data/r0-china.csv"),
+  col_types = cols(
+    cidade = col_character(),
+    data = col_date(format = "%d/%m/%Y"),
+    R0 = col_double(),
+    temperatura = col_double(),
+    humidade = col_double()
+  )
+)
+
+```
+
+```{r}
+
+#glimpse(contagio)
+
+cheng = contagio %>% 
+filter(cidade == "Chengdu")
+
+```
+
+## R0 x Humidade(%)
+
+Analisando a relação R0 x humidade da cidade de Chengdu
+
+```{r}
+
+cheng %>% 
+ggplot(aes(humidade,R0))+
+geom_point()
+
+```
+
+Correlação linear média, talvez seja um pouco mais que 0.5.
+
+```{r}
+
+cheng %>% 
+summarise(c = cor(x = humidade,y = R0,method = "pearson"))
+
+```
+
+Fazendo no olho(em vermelho).
+
+```{r}
+
+modelo_lm = lm(R0 ~ humidade,data = cheng)
+modelo_lm
+
+cheng %>% 
+ggplot(aes(humidade,R0))+
+geom_point()+
+geom_abline(slope = 0.0074,intercept = 1.430,color = "red")+
+geom_abline(slope = 0.004663, intercept = 1.650803, color = "blue")
+
+
+```
+
+
+Uma relação R0 = 0.004663*humidade + 1.650803 descreve bem a relação entre essas variáveis em Chengdu.
+
+Quantificando a qualidade do modelo:
+
+```{r}
+
+modelo = function(humidade,slope,intercept){
+    humidade*slope + intercept
+}
+
+nossas_estimativas = cheng %>% 
+mutate(
+  estimativa = modelo(humidade,0.004663,1.650803),
+  residuo = R0-estimativa,
+  residuo_quad = residuo**2
+)
+
+fit_modelo = nossas_estimativas %>% summarise(sse = sum(residuo_quad)) %>% pull(sse)
+
+fit_modelo
+```
+
+Para criar um modelo de comparação, faremos pela média do R0.
+
+```{r}
+
+cheng %>% 
+ggplot(aes(x=""))+
+geom_quasirandom(aes(y = R0))+
+geom_point(aes(y = mean(R0)),shape = 15,color = "red",size = 3)
+
+```
+
+Veremos agora o quanto R0 e sua média descrevem a função de relação.
+
+```{r}
+
+estimativas_media = cheng %>% 
+mutate(estimativa = mean(R0),
+       residuo = R0-estimativa,
+       residuo_quad = residuo**2)
+
+modelo_media = estimativas_media %>% summarise(sse = sum(residuo_quad)) %>% pull(sse)
+
+melhora = (modelo_media-fit_modelo)/modelo_media
+
+tibble(melhora = melhora,R2_media = modelo_media)
+
+```
+
+A função do nosso modelo descreve 21% melhor os pontos do que o modelo da média.
+
+Regressão linear simples foi utilizada para analisar, na cidade de Chengdu, a associação entre R0(y) e humidade(a). OS resultados indicam que um modelo no formato R0 = 0.004663*humidade + 1.650803 explicam 38.28% da variância da variável de resposta (R2 = 0.382). O aumento de 1 unidade de humidade medida como % representa um aumento de 0.004663 em R0. Portanto, quando maior a humidade na cidade de Chengdu, maior o coeficiente de contaminação do vírus. Embora exista uma relação entre R0 e humidade, a influência da humidade é modesta, tendo em vista que a humidade tenha que varias bastante para atingir variações consideráveis de R0.
+
+
+Em Shangai, quanto menor a humidade, mais infecções. Já em Chengdu acontece o contrário, mas menos intensamente, tendo em vista que Shangai progride em -0.0047 e Chengdu em 0.0047 por unidade de humidade.
+
+
+
+## R0 x Temperatura(°C)
+
+Faremos o mesmo processo de antes, mas dessa vez para a temperatura de Chengdu.
+
+Visualizando a relação.
+
+```{r}
+cheng %>% 
+ggplot(aes(temperatura,R0))+
+geom_point()
+
+```
+
+A relação R0xtemperatura aparenta ser fortemente linear e negativa. Talvez esteja na casa dos -0.8.
+
+```{r}
+
+cheng %>% summarise(c = cor(temperatura,R0,method = "pearson"))
+
+```
+
+Visualizando o modelo da relação. Dessa vez não farei no olho.
+
+```{r}
+
+modelo_lm = lm(R0 ~ temperatura,data = cheng)
+
+cheng %>% 
+ggplot(aes(temperatura,R0))+
+geom_point()+
+geom_abline(slope = -0.02602,intercept = 2.25946, color = "red")
+
+```
+
+Uma equação no formato R0 = -0.02602 * temperatura + 2.25946 descreve bem a relação entre essas duas variáveis para Chengdu.
+
+Fazendo o R2 do nosso modelo.
+
+```{r}
+
+modelo = function(temperatura,slope,intercept){
+    temperatura*slope + intercept
+}
+
+modd = cheng %>% 
+mutate(
+  estimativa = modelo(temperatura,-0.02602,2.25946),
+  residuo = R0-estimativa,
+  residuo_quad = residuo**2
+)
+
+fit_modelo = modd %>% summarise(sse = sum(residuo_quad)) %>% pull(sse)
+
+fit_modelo
+```
+
+Modelo da média para fins de comparação com o nosso.
+
+```{r}
+
+modd = cheng %>% 
+mutate(
+  estimativa = mean(R0),
+  residuo = R0-estimativa,
+  residuo_quad = residuo**2
+)
+
+media_modelo = modd %>% summarise(sse = sum(residuo_quad)) %>% pull(sse)
+
+melhora = (media_modelo-fit_modelo)/media_modelo
+
+tibble(media_modelo = media_modelo,melhora = melhora)
+
+```
+
+A equação do modelo descreve 38.28% melhor a relação de R0 e temperatura.
+
+
+Reressão linear simples foi utilizada para analisar a relação entre R0(y) e temperatura(a) . Os resultados da regressão indicam que um modelo no formato R0 = -0.02602 * temperatura + 2.25946 explicam 53.6% da variância da variável da resposta(R2 = 0.108). O aumento de 1 unidade de temperatura, representada por Graus Celsius(°C), produz uma mudança de -0.02602 em R0. Portanto, mesmo com uma relação forte entre R0 e temperatura, a influência que temperatura tem sobre R0 é modesta. Ou seja, para a cidade de Chengdu, quanto maior a temperatura, menor é o coeficiente de transmissão do vírus. Além disso, apesar da temperatura ser um fator relacionado a R0, é necessária uma variação considerável na temperatura para ser notada a variação de R0.
+
+R2 == melhora.
+
+
+
+
+
+0.004 x -0.0260
+O modelo de regressão linear simples em Chengdu mostra que a temperatura tem mais influência sobre o contágio do que humidade.
+
+0.536 x 0.387
+
+O modelo de regressão linear simples em Chengdu explica melhor a relação de contagio x temperatura do que a relação de contagio x humidade. Ou seja, 
+

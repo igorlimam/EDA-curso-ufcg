@@ -1,0 +1,127 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+
+library(tidyverse)
+
+
+```
+
+
+
+```{r}
+
+#correlaçao entre altura e pes dos personagens de star wars
+starwars %>% 
+filter(!is.na(height) & !is.na(mass)) %>% 
+ggplot(mapping = aes(x = height,y = mass))+
+geom_point()
+
+
+```
+
+
+```{r}
+
+#correlaçao entre altura e pes dos personagens de star wars
+starwars %>% 
+filter(!is.na(height) & !is.na(mass),mass < 1000) %>% 
+ggplot(mapping = aes(x = height,y = mass))+
+geom_point(alpha = 0.6)
+
+
+```
+
+Relações
+1. Formato: linear vs outros
+2. Sinal: positivo vs negativo
+3. Força: fraca vs media vs forte(-1,...,1)
+4. Pontos extremos(exceções)
+
+
+Correlação
+valores altos de uma variavel acontecem juntos com os valores de outra variavel, seja alto ou baixo.
+
+aumento de uma variável causa reação na outra.
+
+É possivel observar uma correlação entre duas variaveis, mas não necessariamente elas são as proprias causas.
+
+Correlação =/= causalidade.
+
+
+Causalidade -> Correlação
+
+Causalidade sempre causa correlação.
+
+Nas correlações, às vezes vem de causas, mas geralmente não.
+
+Quantificando correlações:
+
+Comparar correlações visualmente e resumi-las
+
+
+```{r}
+
+#correlaçao entre altura e pes dos personagens de star wars
+starwars %>% 
+mutate(human = if_else(species == "Human","Human","Other"))
+
+
+```
+
+Sumário da correlação
+
+Coeficiente de correlação: -1 .. 0 .. 1
+
+Passo 1: Idenficar o formato da relação
+Passo 2: usar coeficiente adequado
+
+Coeficiente de correlação linear(p/ relaç~eos lineares)
+Correlações nao lineares ou nao parametricas
+
+Correlacoes nao lineres: 
+Spearman: rho -> correlacao linear entre valor rank(x) vs rank(y)
+Kendall: theta -> x_i > x_y, y_i > y_j ? Sempre: 1, Nunca: -1, outro: 0
+
+
+```{r}
+
+#Pearson
+starwars %>% 
+filter(!is.na(height) & !is.na(mass),mass < 1000) %>% 
+summarise(correlacao = cor(mass,height,method="pearson"))
+
+
+```
+
+----
+
+
+Quanto mais alto o valor de x é, mais alto ou baixo Y é.
+Coeficiente == 0.333, significa que 1/3 da relação estão diretamente correlacionadas.
+
+
+```{r}
+
+#spearman
+starwars %>% 
+filter(!is.na(mass) & !is.na(birth_year)) %>% 
+summarise(correlacao = cor(birth_year,mass,method="spearman"))
+
+
+```
+
+
+Duvida spearman: ranking?
+Quando pearson nao reflete a realidade dos dados por causa de extremos ou um comportamento nao linear
+
+
+Tranforma as curvas em retas pelo convertimento para ranking.
+
+
+
+

@@ -1,0 +1,73 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+
+library(tidyverse)
+library(broom)
+library(boot)
+
+times = read_csv("data/times.csv")
+
+```
+
+
+```{r}
+
+times = times %>% 
+filter(time < 1,time > 0)
+
+times %>% 
+ggplot(aes(time))+
+geom_histogram(binwidth = 0.05)+
+geom_vline(xintercept = mean(pull(times,time)))
+
+theta = times %>% 
+pull(time) %>% 
+mean()
+
+theta_f = function(d,i){
+  
+    d %>% 
+    slice(i) %>% 
+    summarise(media = mean(time)) %>% 
+    pull(media)
+  
+}
+
+times %>% 
+boot(statistic = theta_f,R = 4000) %>% 
+tidy(conf.level = 0.95,conf.int = TRUE)
+
+
+
+
+```
+
+Estimamos a partir da nossa amostra que é plausível o tempo de acesso médio do site da wizards of the coast a partir do meu computador estar entre 1475.536 ms e 1509.189 ms, tal intervalo tem 95% de confiança.
+
+
+
+```{r}
+
+times %>% 
+filter(time >= 0.1475536) %>% 
+arrange(time)
+
+faixa = times %>% 
+filter(time >= 0.1475536) %>% 
+count()
+
+
+  
+
+```
+
+
+
+
+
+

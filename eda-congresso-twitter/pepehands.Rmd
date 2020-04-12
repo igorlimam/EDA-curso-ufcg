@@ -1,0 +1,58 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(tidyverse)
+library(ggbeeswarm)
+parlam = read_csv("data/atividade-por-perfil-20190322.csv")
+
+```
+
+Temos 81 perfis de senadores e mais de 517 perfis de deputados provavelmente porque há deputados.
+
+DPLYR
+
+Operacoes de tranformacao:
+Summarise -> Cria novas informacoes usando antigas/Sumarios estatisticos
+mutate -> Cria colunas
+filter -> Seleciona linhas
+select -> seleciona colunas
+group_by -> Faz com que uma parte dos dados sejam atômicos baseados em uma característica comum.
+
+Outras funcoes uteis:
+n() -> Contagem de elementos de um mesmo grupo
+
+
+Outros verbos dplyr:
+Arrange
+
+Existem caracteristicas que 
+
+É mais facil perceber posicao do que cor. A posicao do ponto a gente percebe muito melhor do que a cor do ponto. A cor fica mais dificil.
+
+Diferença entra pontos que tem cores parecidas é consufuso.
+
+Tamanho a gente percebe razoavelmente bem.
+
+Existem caracteristicas mais perceptiveis, e essas nos devemos usar.
+
+Para os fins do que faremos aqui> regra de ouro: Posicao é muito melhor do que qualquer outra caracteristica que voce possa atribuir aos seus pontos, barras ou linhas.
+
+Posicao é o mais importante. X e Y são mais importantes e melhores para a avizualização de dados.
+
+Posicao tem que ser facil e amigavel. O grafico tem que ser facilmente lido.
+
+Para vizualisacao
+
+ploty
+
+
+
+```{r}
+
+View(parlam)
+
+```

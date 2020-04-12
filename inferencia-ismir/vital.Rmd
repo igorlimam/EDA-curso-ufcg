@@ -1,0 +1,177 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+
+Outra tecnologia para IC
+
+DIferenca estatisticamente significativa.
+
+
+
+
+na escala
+
+
+
+Estimamos que a media da satisfacao dos usuarios usnado ld é superiror à media da satisfacao usando a baseline. A diferença nas medias esta entre x e y com 95% de confianca, o que indica que a diferença é media 
+
+Sempre que fizer exercicio, pense no sinal da faixa de valores. Alem disso faça um juizo dizendo se é de valores altos de baixos.
+
+Irrelevante, consideravel, alta.
+
+
+0.003,7.122
+"Contudo, esse método se apresentou como sendo bem controverso quanto as simulações pelo bootstrap tendo em vista que existem as faixas de valores onde a diferença é irrelevante, onde a diferença é relevante e a diferença é muito relevante."
+
+Voce tira a media de cada grupo para aumentar a confianca e garantir que voce nao vai ter problemas com a quantidade de entradas de cada classe. Apos o agrupamento, tiram-se as medias por grupo.
+
+Sentido e intensidade. Positivo ou negativo, muito melhor ou irrelevante.
+
+
+
+B - ou equivalente ou diferença irrelevante
+
+
+Depois de fazer as comparacoes com um modelo base. Selecione os melhores resultados e repita o processo.
+
+Revise o trabalho melhorando as conclusões.
+
+Fazer a comparação com os outros grupos. Usando a ferramenta.
+
+Two groups and "shared control"
+
+Escolha as comparacoes. Faz todos com o baseline.
+
+BOOT - Sempre usar BCA
+bias-corrected and accelerated (BCa)
+
+Relatorio: O que fazer.
+
+1 - Comparar cada um dos metodos com o baseline e anotar as informações.
+De preferência esboçar um grafico para avaliar os resultados.
+
+2 - Fazer a comparacao conjunto somente para fins didáticos e depois comparálos com o melhor resultado aparente.
+
+Apos isso escrever as conclusões associadas aos resultados, ou seja, qual o melhor mecanismo a ser implementado.
+
+
+Considerando as classificações para cada faixa de valor e comparando o mecanismo baseline com os demais temos (Intervalos possuem 95% de confiança):
+
+k>0 e k<1: Pouco melhor
+k>=1 e k<3: consideravelmente melhor
+k>=3: extremamente melhor
+
+Baseline x like/dislike: O mecanismo de like/dislike é preferível(diferença positiva) e consideravelmente melhor que a baseline, tendo em vista que o intervalo de confiança da media é de 1.17 a 1.83. Dessa forma podemos dizer que vale a pena implementar essa função em detrimento a baseline.
+
+
+
+Baseline x up/downvote: O mecanismo de up/downvote é preferível e consideravelmente melhor que a baseline, tendo em vista que o intervalo de confiança da media é de 1.93 a 2.57. Dessa forma podemos dizer que vale a pena implementar essa função em detrimento a baseline.
+
+Baseline x skip: O mecanismo de skip é preferivel e pouco melhor que a baseline, tendo em vista que o intervalo de confiança da media é de 0.04 a 0.7. Dessa forma podemos dizer que não vale a pena, pois os ganhos não são significativos.
+
+Baseline x combined: O mecanismo de combined é preferível e consideravelmente melhor que a baseline, tendo em vista que o intervalo de confiança da media é de 1.57 a 2.24. Dessa forma, podemos dizer que vale a pena implementar essa função em detrimento a baseline.
+
+
+Existem três candidatos que oferecem boas melhorias, mas precisamos escolher apenas 1. Like, up e combined oferecem melhorias consideraveis, investigaremos então qual dessas três tem a melhor melhoria dentre elas. Usaremos como controle o mecanismo like/dislike.
+
+Como todos foram considerávelmente melhores que baseline, esperamos que a diferença entre eles não supere 2. Assim a nova faixa de avaliação fica:
+
+k>0 e k<0.4: pouco melhor
+k>=0.4 e k<1: consideravelmente melhor
+k>=1: muito melhor
+
+
+like x updown:  O mecanismo de updown é preferivel (like-updown > 0), podendo ser tanto consideravelmente melhor como muito melhor que o de like, tendo em vista que o intervalo de confiança da média varia de 0.47 a 1.07.
+
+like x combined: O mecanismo de combined é preferivel (like - combined > 0), podendo ser tanto pouco melhor como consideravelmente melhor que o de like, tendo em vista que o intervalo de confiança da média varia de 0.10 a 0.72.
+
+
+
+Como combined engloba a faixa de pouco e considerável, enquanto updown engloba considerável e muito melhor, podemos dizer que o mecanismo up/down é o melhor a ser implementado, levando em conta que ele oferece a melhor faixa de satisfação.
+
+
+1 - updown (complicado)
+2 - combined (muito complicado)
+3 - like (easy)
+4 - skip (medio)
+5 - baseline (easy)
+
+
+Se tivermos dois intervalos de confianca, se os doios intevvalos nao tem sobreposivcao entao eu sei que se eu fizer a-b nao vai inclui o 0. A faixa de valores nao vai incluir a possibilidade de que nao haja igualdade.
+
+Se nao há interseção, IC da diferença nao inclui 0.
+se tem muita interseção o IC da diff inclui 0;
+se tem pouca não sabemos.
+
+
+
+Inf: Estimamos que a diferenca entre a e b esta entre x e y, com 95% de confiança.
+
+Hip: Estimamos que há uma diferença estatisticamente significativa entre A e B.
+
+Quao estranho seria observar theta_c = k se theta fosse 0.
+
+se tc nao é esperado quando t == 0
+entao t provavelmente nao é 0.
+
+t == 0 quando os valores de satisfacao indepedem do mecanismo.
+
+Modelo nulo (theta == 0) -> Tentativa de simular onde nao existe diferença entre os dois grupos.
+
+
+Theta_c -> media comum.
+
+
+se theta_c nao é esperado quando theta é 0.
+Então não é esperado que theta seja 0.
+
+inferencia estatistica
+->estimacao e intervalos de confiança.
+->Teste de hipótese(nula estatística).
+Diferenca estatistcamente significativa:
+
+
+Vocab: diff() <- subtracao
+Modelo nulo: Quando theta == 0.
+
+Metrica: p-valor(): Chance de o modelo nulo gerar uma diferença maior ou igual que o da nossa amostra.
+
+é incomum que alguem chegue a observar esse valor.
+
+p-valores menores que 0.05 são evidencia forte de diferença
+
+p chance de eu estar errado.
+
+p-> mais confiança ou significância. Indice de significância.
+
+Ou seja, confianca de que  o dado visto nao veio do modelo nulo.
+
+Quanto menor p mais confiança, significancia.
+
+se p<0.05 entao o IC de 95% nao inclui 0.
+Caos contrario o IC de 95% inclui 0.
+
+Se nao inclui 0, então voce chega em uma alta significancia.
+
+
+
+
+
+
+
+
+
+
+
+
+

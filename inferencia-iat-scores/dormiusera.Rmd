@@ -1,0 +1,69 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+A aula de amanhã vai começar que horas?
+
+```{r include=FALSE}
+
+library(tidyverse)
+library(ggbeeswarm)
+universidade = read_csv("data/uva .csv")
+
+```
+
+
+```{r}
+
+glimpse(universidade)
+
+```
+
+Conjunto Universo/Populacao.
+
+Aulas de amostragem e inferencia estatistica.
+
+Variacao amostral: Diferença de resultado entre as diferentes amostras.
+
+O datafolha pega uma amostra de brasileiros. Que em geral tem 2000~3000 brasileiros. E entoa usam a informacao ddesses 2k e calculam o theta e usam o dado na amostra para representar o espaco, universo.
+
+
+Quantis % dos brasileiros votariam em um certo candidato.
+
+Ele liga para x brasileiros e pergunta para quem quer votar.
+
+Dai pega quantos votaram em A/todos. Dai voce calcula e usa essa informação da amostra e infere para o resto da população como sendo a intencao de voto geral.
+
+Queremos olhar uma amostra e conseguir falar alguma caracteristica sobre o universo. 
+
+Inferencia estatistica: Essa é uma das coisas mais importantes e mais escorregadias da estatistica. Embora seja uma ferramente muito importante de ser dominada
+
+É o processo de voce usar informacao da amostra para falar sobre o universo.
+
+Amostragem: Como se constroi a amostra. 
+
+Se voce quer construir uma amnostra sobre o universo, voce tem que ter uma amostra que mais se parece com o universo como um todo, caso contrario voce estara pegando uma amostra que nao representa o universo.
+
+Objetivo de hoje foi dar nomes e conhecer os elementos da inferencia estatistica: populacao, amostra e margens.
+
+Calculo de uma margem de erro e incerteza: Proxima aula.
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+

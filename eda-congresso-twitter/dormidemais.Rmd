@@ -1,0 +1,173 @@
+---
+title: "Partido Twitter"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r include = FALSE}
+
+library(tidyverse)
+library(ggbeeswarm)
+
+twittada = read_csv("data/atividade-por-perfil-20190322.csv")
+
+```
+
+
+Queremos saber se, o uso do twitter dos parlamentares de um partido (engajamento), reflete diretamente no número de seguidores total desse mesmo partido. Como existem vários deles, pegaremos os dez com a maior soma de engajamento.
+
+
+```{r ECHO=FALSE, warning = FALSE}
+
+#View(twittada)
+
+top_ten = twittada %>% 
+group_by(partido) %>% 
+filter(!is.na(engaj_total)) %>% 
+summarise(engaj_partido = sum(engaj_total)) %>% 
+arrange(desc(engaj_partido)) %>% 
+head(10)
+
+twittada %>% 
+filter(!is.na(engaj_total),partido %in% top_ten$partido) %>% 
+ggplot(mapping=aes(y = partido,x = engaj_total))+
+geom_boxplot(coef = 1000)+
+geom_point(alpha = 0.3)+
+scale_x_log10()
+
+
+
+```
+
+
+PSOL, PT e PSL parecem possuírem mais presença no Twitter que os demais. Dito isso, queremos agora ver a correlação entre o engajamento e a quantidade de seguidores dos parlamentares desses três partidos.
+
+
+```{r}
+
+#View(twittada)
+twittada %>% 
+filter(partido %in% c("PSOL","PT","PSL")) %>% 
+filter(!is.na(engaj_total),!is.na(seguidores)) %>% 
+ggplot(mapping=aes(y = seguidores,x = engaj_total))+
+geom_point()+
+scale_x_log10()+
+scale_y_log10()+
+facet_wrap(~partido)
+
+
+```
+
+
+Todos eles lembram uma correlação linear, mas de intensidades diferentes. Pela vizualização, provavelmente o PSL tem a correlação mais forte dentre os três partidos.
+
+
+```{r}
+
+#View(twittada)
+twittada %>%  
+
+filter(!is.na(seguidores),!is.na(engaj_total),partido %in% c("PSOL","PT","PSL")) %>% 
+  
+group_by(partido) %>% 
+summarise(pearson = cor(x = log10(engaj_total),y = log10(seguidores), method="pearson"),
+          spearman = cor(x = log10(engaj_total),y = log10(seguidores), method="spearman"),
+          kendall = cor(x = log10(engaj_total),y = log10(seguidores), method="kendall"))
+
+
+```
+
+O PSL tem uma distribuição linear forte. Ou seja, pelo menos para os parlamentares do PSL, quanto mais tempo eles passam no twitter, mais seguidores são adquiridos. Mesmo assim, não é possível reponder se o tempo investido no twitter é, necessariamente, a causa do acréscimo de seguidores.
+
+
+```{r}
+
+twittada %>% 
+group_by(partido) %>% 
+summarise(qtd = n()) %>% 
+arrange(desc(qtd)) %>% 
+
+ggplot(mapping = aes(x = reorder(partido,qtd),y = qtd,size = qtd))+
+geom_point()+
+
+labs(title = "Tamanho das bancadas",
+     x = "",
+     y = "Congressistas")
+
+```
+
+
+```{r}
+
+#Partidos ou estados mais e menos presentes nas redes sociais
+
+twittada %>% 
+group_by(UF) %>% 
+summarise(qtd = sum(!is.na(twitter))/n(),tem_twitter = sum(!is.na(twitter)),total = n()) %>% 
+arrange(desc(qtd))
+
+```
+
+```{r}
+
+#Partidos ou estados mais e menos presentes nas redes sociais
+
+twittada %>% 
+filter(UF == "SP",is.na(twitter)) %>% 
+select(nome_eleitoral)
+
+```
+
+```{r}
+twittada %>% 
+  group_by(UF) %>% 
+  summarise(com_twitter = sum(!is.na(twitter)) / n(), 
+            bancada = n()) %>% 
+  ggplot(mapping = aes(x = reorder(UF, com_twitter), 
+                       y = com_twitter, 
+                       color = bancada,
+                       size = bancada)) + 
+  geom_point(color = "salmon", alpha = .8) + 
+  coord_flip()
+```
+
+
+```{r}
+
+twittada %>% 
+  group_by(UF) %>% 
+  summarise(com_twitter = sum(!is.na(twitter)) / n(), 
+            bancada = n()) %>% 
+  ggplot(mapping = aes(x = reorder(UF, com_twitter), 
+                       y = com_twitter, 
+                       color = bancada,
+                       size = bancada
+                       )) + 
+  geom_point(alpha = .8) + 
+  geom_text(aes(label = bancada), size = 2, hjust = -1) + 
+  coord_flip() 
+
+```
+
+
+```{r}
+twittada %>% 
+  group_by(UF) %>% 
+  mutate(ativo = !is.na(twitter) & (n_proprio >= 10)) %>% 
+  summarise(com_twitter = sum(ativo) / n(), 
+            bancada = n()) %>%
+  mutate(regiao = if_else(
+    UF %in% c("PB", "AL", "SE", "BA", "PI", "PE", "RN", "MA", "CE"),
+    "Nordeste",
+    "Outros"
+  )) %>%
+  ggplot(mapping = aes(x = reorder(UF, com_twitter), 
+                       y = com_twitter, 
+                       size = bancada, 
+                       color = regiao))+
+  geom_point()
+```
+
+
+

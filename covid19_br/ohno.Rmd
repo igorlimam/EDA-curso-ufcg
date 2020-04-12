@@ -1,0 +1,40 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r indlue=FALSE}
+
+library(tidyverse)
+library(ggbeeswarm)
+casos = read_csv("https://brasil.io/dataset/covid19/caso?format=csv")
+
+```
+
+
+```{r}
+
+campina = casos %>% arrange(city)
+View(campina)
+
+#scale_color_manual -> cor dos pontos dos fatores.
+#geom_density (x = some) 
+
+#mediana -> Tal valor divide os dados ao meio: 50% dos dados são maiores que a mediana e 50% dos dados são menores que a mediana
+
+
+
+```
+
+Warning em escala de log significa que ha valores zero em meio aos valores
+
+Quando comparando duas coisas com a mesma escala: geom_abline(slope=1,intercept = 0)
+
+Se estiver usando escalas de log nao esqueça de logaritmar os dados na hora de calcular a correlação.
+
+Evite perguntas de registro(Qual o maior, qual mais, qual o menor).Não são interessantes, são pobres.
+
+Busque por relações, comparações. Como: qual a relação entre isso e aquilo? Como tal coisa se comporta em relação a outra coisa. Sempre tente trazer a palavra RELAÇÃO.
+

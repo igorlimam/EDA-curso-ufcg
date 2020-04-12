@@ -1,0 +1,152 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+
+library(tidyverse)
+library(ggbeeswarm)
+
+experimento = read_csv("data/experimento-lastfm.csv")
+
+```
+
+
+Geralmente nao vai ter como aplicar a distribuicao em toda a populacao.
+
+sample(k) pegam os primeiro k registros da tabela
+
+sampel_n(k) pegam k registros aleatorios da tabela.
+
+Criar tabela = tibble(colName = valueRange)
+
+'~' chama, implicitamente, uma funcao
+
+Mostarndo a diferença entre a distribuição amostral e os resultados da população
+
+DISTRIBUICAO NORMAL.
+
+Fazer a media das amostras e comparar com a da populacao causa uma distribuicao normal. MEDIA -> NORMAL
+
+Geralmente, o erro amostral é sempre uma distribuicao normal. Com isso, é possivel, matematicamente, calcular as estimativas.
+
+Erro amostral -> quantil
+
+Confiança -> Porcentagem é arbitrária. Lembra uma faixa de valores, como: 5% abaixo da faixa e 5% acima da faixa. Ou seja, de [5,95] sendo a faixa, então existe 90% de confiança.
+
+Poucas amostras representam pouca informacao e muita variacao entre as amostras.
+O tamanhjo da amostra impacta no tamanho da margem de erro para um mesmo nivel de confiança.
+
+Maiores confiancas produzem maiores margens.
+Menor confiança menor margem de erro.
+
+usa 95 pra tudo por convencao.
+
+Como nao temos a distribuicao do erro amostral nos estimamos ela.
+Dessa forma, podemos calcular a margem de erro.
+
+Bootstrapping: 
+Assumindo que a amostra é uma boa representacao da amostra.
+
+Reamostragem com repetição: Fazer amostragens de mesmo tamanho a amostra.
+
+
+
+Theta = MEdiana do tempo de acesso na populacao <- Objetivo
+
+Theta c = Mediana do tempo de acesso na amostra <- temos
+
+Usei uym metodo que geralmente contem os valores desejados. Cmo confiancao eu creio que esteja nessa faixa. è conceitualmente errado dizer que tem a chance de confianca do numero esta nessa faixa.
+
+```{r}
+
+theta_c = uol %>% 
+summarise(mediana = median(tempo)) %>% 
+pull(mediana)
+
+```
+
+
+
+Theta = proporcao em geral de news. news/(news+old)
+
+Estimamos a partir da nossa amostra que é plausível que a média da proporção de artistas novos escutados por pessoas no Lastfm esteja entre 0.235 e 0.261 (IC com 95% de confiança)
+
+Confiança nao significa que o resultado vai cair nessa porcentagem.
+
+Confiança =/= chance de alguem estar nesse valor.
+
+
+PROPORCAO == PARTE/TODO
+
+
+Quando se ve que marina esta entr 11 e 15 das intencoes.
+
+Isso significa que a gente acha que a amarhgemn dela esta entre 11 e 15. Usamos um modelo que trouxe esse valor, nao que seja exatamente nessa faixa.
+
+É uma faixa de valor esperado, mas não significa que seja a chance real do valor aparecer.
+
+Confianca é o que temos no metodo que estima o intervalor de confianca. è a precisao do método utilizado.
+
+Faixa de valores onde é plausivel que esteja um parametro da populacao
+
+
+```{r}
+
+library(boot)
+library(broom)
+
+theta_f = function(d,i){
+    
+    d %>% 
+    slice(i) %>% 
+    summarise(media = mean(prop)) %>% 
+    pull(media)
+    
+}
+
+
+experimento %>% 
+boot(statistic = theta_f,R = 4000) %>% 
+tidy(conf.level = 0.95, conf.int = TRUE)
+
+
+```
+
+
+
+boot(dados, indices dos dados que devem ser usados (reamostragem))
+
+
+```{r}
+
+Biblioteca Boot. Brincar com ela.
+
+Estimar o tempo de acesso para algum site.
+
+theta = function(d,i){
+    
+    d %>% 
+    slice(i) %>% 
+    summarise(correlacao = cor(news,old)) %>% 
+    pull(correlacao)
+    
+}
+
+lastfm %>% 
+boot(statistic = theta,R = 4000)
+
+```
+
+
+
+
+
+
+
+
+
+
